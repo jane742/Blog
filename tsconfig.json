@@ -6,5 +6,10 @@
     "src/**/*",
     "env.d.ts",
     ".astro/types.d.ts" 
-  ]
+  ],
+ "compilerOptions": {
+    "skipLibCheck": true,
+    "checkJs": false,
+    "allowJs": true
+  } 
 }

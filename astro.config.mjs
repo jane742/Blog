@@ -8,4 +8,5 @@ export default defineConfig({
   output: 'server', // Middleware работает только в SSR режиме
 adapter: vercel(),
   integrations: [db()],
+
 });
