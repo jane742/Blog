@@ -1,0 +1,39 @@
+---
+import { db, Post, Tag, PostTag, eq } from 'astro:db';
+import Layout from '../../layouts/Layout.astro';
+import Menu from '../../components/Menu.astro';
+const { tag } = Astro.params;
+
+if (!tag) return Astro.redirect('/');
+
+// Сложный запрос: выбираем посты, которые связаны с данным тегом
+const filteredPosts = await db
+  .select({
+    title: Post.title,
+    slug: Post.slug,
+    date: Post.publishedAt
+  })
+  .from(Post)
+  .innerJoin(PostTag, eq(Post.id, PostTag.postId))
+  .innerJoin(Tag, eq(PostTag.tagId, Tag.id))
+  .where(eq(Tag.name, tag));
+---
+<Layout>
+<Menu/>
+<div class="container py-1 mb-3 "> 
+    <h3>Статті з тегом: #{tag}</h3>
+
+    {filteredPosts.length === 0 ? (
+      <p>Статей поки що немає.</p>
+    ) : (
+      <ul>
+        {filteredPosts.map(post => (
+          <li>
+            <a href={`/blog/${post.slug}`}>{post.title}</a> 
+            <small>({new Date(post.date).toLocaleDateString()})</small>
+          </li>
+        ))}
+      </ul>
+    )}
+    </div>
+ </Layout>

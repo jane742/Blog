@@ -1,0 +1,343 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Menu from '../components/Menu.astro';
+import { marked } from 'marked';
+import { db, Post, PostTag, Tag, User,desc, count,eq,like,sql,or} from 'astro:db';
+
+
+// 1. Определяем текущую страницу из URL (например, /?page=2). Если параметра нет — это 1 страница.
+const url = new URL(Astro.request.url);
+const currentPage = parseInt(url.searchParams.get('page') || '1', 10);
+const postsPerPage = 5; // Сколько постов показывать на одной странице
+
+const page = parseInt(url.searchParams.get('page') || '1', 10);
+const offset = (page - 1) * postsPerPage;
+// 1. Получаем сырую строку из URL
+const rawSearchQuery = url.searchParams.get('search') || '';
+
+// 2. Очищаем строку от скрытых невидимых символов, неразрывных пробелов и пробелов по краям
+const searchQuery = rawSearchQuery
+  .replace(/[\u200b\u200c\u200d\u200e\u200f\ufeff\u00a0]/g, '') // удаляем BOM и невидимые спецсимволы
+  .trim(); // удаляем обычные пробелы по краям
+
+const searchLower = searchQuery.toLowerCase();
+const searchCapitalized = searchQuery ? searchQuery.charAt(0).toUpperCase() + searchQuery.slice(1).toLowerCase() : '';
+
+// ==========================================
+// ШАГ 1: ПОДСЧЕТ КОЛИЧЕСТВА НАЙДЕННЫХ СТАТЕЙ
+// ==========================================
+let countQuery = db
+  .select({ total: count() })
+  .from(Post);
+
+// Если есть поиск, считаем только те статьи, которые подходят под условие
+if (searchQuery !== '') {
+countQuery = countQuery.where(
+    or(
+      like(Post.title, `%${searchLower}%`),       // Ищет "астро"
+      like(Post.title, `%${searchCapitalized}%`)  // Ищет "Астро"
+    )
+  );
+}
+
+// Получаем итоговую цифру (например, 12)
+const countResult = await countQuery;
+const totalPosts = countResult[0]?.total || 0;
+
+// Вычисляем общее количество страниц для пагинации
+const totalPages = Math.ceil(totalPosts / postsPerPage);
+
+
+// ==========================================
+// ШАГ 2: ПОЛУЧЕНИЕ САМИХ СТАТЕЙ (Твой запрос)
+// ==========================================
+let postsQuery = db
+  .select({
+    id: Post.id,
+    title: Post.title,
+    slug: Post.slug,
+    body: Post.body,
+    image: Post.image,
+    publishedAt: Post.publishedAt,
+    views: Post.views,
+    authorName: User.username 
+  })
+  .from(Post)
+  .innerJoin(User, eq(Post.authorId, User.id));
+
+// Применяем точно такое же условие поиска к списку статей
+if (searchQuery !== '') {
+postsQuery = postsQuery.where(
+    or(
+      like(Post.title, `%${searchLower}%`),
+      like(Post.title, `%${searchCapitalized}%`)
+    )
+  );
+}
+
+// Применяем сортировку и пагинацию к отфильтрованным результатам
+const allPosts = await postsQuery
+  .orderBy(desc(Post.publishedAt))
+  .limit(postsPerPage)
+  .offset(offset);
+
+
+
+
+  // 2. Получаем топ-3 популярных постов по количеству просмотров
+const popularPosts = await db
+  .select()
+  .from(Post)
+  .orderBy(desc(Post.views))
+  .limit(3);
+
+// Получаем все теги и считаем, сколько постов привязано к каждому из них
+const tagsWithCount = await db
+  .select({
+    id: Tag.id,
+    name: Tag.name,
+    // Агрегатная функция count подсчитывает количество строк в промежуточной таблице PostTag
+    postCount: count(PostTag.postId), 
+  })
+  .from(Tag)
+  // Делаем leftJoin, чтобы даже теги с 0 постов не ломали запрос (хоть их и не стоит выводить)
+  .leftJoin(PostTag, eq(Tag.id, PostTag.tagId))
+  // Группируем по ID тега, чтобы подсчет шел отдельно для каждого тега
+  .groupBy(Tag.id)
+  // (Опционально) Сортируем: сначала самые популярные теги
+  // .orderBy(desc(count(PostTag.postId))); 
+
+  
+// Функция для полной очистки текста от разметки Markdown
+function cleanMarkdown(rawText: string | null): string {
+  if (!rawText) return 'Нет описания к этой статье.';
+
+  let text = rawText;
+
+  // 1. Вырезаем картинки вида ![альтернативный текст](url)
+  text = text.replace(/!\[.*?\]\(.*?\)/g, '');
+
+  // 2. Вырезаем ссылки, оставляя ТУЛЬКО сам текст ссылки: [Мой сайт](url) -> Мой сайт
+  text = text.replace(/\[(.*?)\]\(.*?\)/g, '$1');
+
+  // 3. Вырезаем многострочные блоки кода вместе с содержимым ```javascript ... ```
+  text = text.replace(/```[\s\S]*?```/g, '');
+
+  // 4. Убираем заголовки (решетки), жирность, курсив, зачеркивание, цитаты и списки
+  text = text.replace(/^(#+\s*|>\s*|-\s*|\*\s*|\d+\.\s*)/gm, ''); // Маркеры строк
+  text = text.replace(/([*_~`]{1,3})/g, ''); // Символы внутри строк
+
+  // 5. Заменяем множественные пробелы и переносы строк на один обычный пробел
+  text = text.replace(/\s+/g, ' ').trim();
+
+  // Возвращаем первые 150 символов очищенного текста
+  return text.slice(0, 150) + (text.length > 150 ? '...' : '');
+}
+
+
+
+---
+
+<Menu/>
+<div class="container my-5" >
+  <div class="row g-5">
+      
+    <main class="col-lg-8">
+<div class="container my-4">
+  <div class="row justify-content-left">
+    <div class="col-md-8 col-lg-6">
+      
+      <form method="GET" action="#" class="d-flex gap-2">
+        <div class="input-group shadow-sm rounded-3 overflow-hidden">
+          <span class="input-group-text bg-white border-end-0 text-muted">🔍</span>
+          <input 
+            type="text" 
+            name="search" 
+            class="form-control border-start-0 ps-0 py-2.5" 
+            placeholder="Пошук статей по назві..." 
+            value={searchQuery} aria-label="Поиск"
+          />
+          {searchQuery && (
+      
+            <a href="/" class="btn btn-white d-flex align-items-center border-start-0 text-black bg-white px-3" title="Очистити">
+              ✕
+            </a>
+          )}
+        </div>
+        <button type="submit" class="btn btn-primary px-4 rounded-3 fw-medium shadow-sm">
+          Знайти
+        </button>
+      </form>
+
+      {searchQuery && (
+        <p class="text-muted small mt-2 mb-0 ps-1">
+          Результати пошука: <strong class="text-secondary">«{searchQuery}»</strong> 
+          (знайдено статей: {totalPosts})
+        </p>
+      )}
+
+    </div>
+  </div>
+</div>
+
+
+
+      <h2 class="h4 pb-3 mb-4  fw-bold text-muted">Останні публікації</h2>
+      
+      {allPosts.length === 0 && (
+        <div class="alert alert-light border text-center p-5 text-muted">
+          ✨ Статей пока нет, но скоро они обязательно появятся!
+        </div>
+      )}
+
+      <div class="d-flex flex-column gap-4">
+        {allPosts.map((post) => (
+          <article class="post-card p-4 rounded-4  bg-transparent  border shadow-sm transition-all d-flex flex-column flex-md-row gap-4 align-items-start">
+            
+            {post.image && (
+              <div class="post-thumb-wrapper overflow-hidden rounded-3 flex-shrink-0 mx-auto mx-md-0" style="width: 180px; height: 120px;">
+                <img src={post.image} alt={post.title} class="w-100 h-100 object-fit-cover" />
+              </div>
+            )}
+
+             <div class="flex-grow-1">
+              <div class="d-flex flex-wrap align-items-center gap-2 text-muted small mb-2">
+                <time datetime={post.publishedAt.toISOString()}>
+                  🗓️ {new Date(post.publishedAt).toLocaleDateString('uk-UA', {
+                    day: 'numeric',
+                    month: 'long',
+                    year: 'numeric'
+                  })}
+                </time>
+                <span>•</span>
+                <span>✍️ {post.authorName}</span> <span>•</span>
+                <span>👀 {post.views || 0}</span>
+              </div>
+               <h3 class="h4  mb-2">
+                <a href={`/blog/${post.slug}`} class="fw-lighter text-light text-decoration-none post-title-link">
+                  {post.title}
+                </a>
+              </h3>
+
+
+
+                <p class="text-muted small mb-0 text-truncate-2">
+{cleanMarkdown(post.body)}
+              </p>
+      
+            </div>  
+          </article>
+))}
+
+</div>
+{totalPages > 1 && (
+        <nav aria-label="Навігація по статтям" class="mt-5">
+          <ul class="pagination justify-content-center">
+            
+            <li class={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
+              {/* <a class="page-link shadow-sm" href={`?page=${currentPage - 1}`} aria-label="Назад">
+                <span aria-hidden="true">&laquo;</span> Назад
+              </a> */}
+              <a href={`/?page=${page -1}${searchQuery ? `&search=${encodeURIComponent(searchQuery)}` : ''}`}>
+ Назад
+</a>
+            </li>
+
+            {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+              <li class={`page-item ${currentPage === page ? 'active' : ''}`}>
+                <a class="page-link shadow-sm" href={`?page=${page}`}>
+                  {page}
+                </a>
+              </li>
+            ))}
+
+            <li class={`page-item ${currentPage === totalPages ? 'disabled' : ''}`}>
+              {/* <a class="page-link shadow-sm" href={`?page=${currentPage + 1}`} aria-label="Вперед"> */}
+<a href={`/?page=${page + 1}${searchQuery ? `&search=${encodeURIComponent(searchQuery)}` : ''}`}>
+  Вперед
+</a>
+
+
+                {/* Вперед <span aria-hidden="true">&raquo;</span>
+              </a> */}
+            </li>
+
+          </ul>
+        </nav>
+      )}
+    </main>
+
+
+
+    <aside class="col-lg-4">
+ <div class="card border-0  bg-gradient rounded-4 p-4 shadow-sm mb-4">
+  <div class="d-flex align-items-center gap-2 mb-3">
+    <span class="fs-5">🏷️</span>
+    <h3 class="h5 fw-bold text-light mb-0">Популярні теми</h3>
+  </div>
+
+  <div class="d-flex flex-wrap gap-2">
+    {tagsWithCount.length === 0 && (
+      <p class="text-muted small mb-0">Тегів ще нет.</p>
+    )}
+
+    {tagsWithCount
+      // Выводим только теги, у которых есть хотя бы одна статья
+      .filter(tag => tag.postCount > 0)
+      .map((tag) => (
+        <a 
+          href={`/tags/${encodeURIComponent(tag.name)}`} 
+          class="badge text-decoration-none rounded-pill px-3 py-2 text-dark border bg-white shadow-sm hover-tag-badge d-inline-flex align-items-center gap-1.5 transition-all"
+        >
+          <span class="text-primary opacity-75">#</span>
+          <span class="fw-medium">{tag.name}</span>
+          <span class="badge bg-primary-subtle text-light rounded-circle px-1.5 py-0.5 fs-xs fw-normal ms-1">
+            {tag.postCount}
+          </span>
+        </a>
+      ))
+    }
+  </div>
+</div>  
+  
+    <div class="card shadow-sm border-0 rounded-4 p-4 mb-4 bg-transparent bg-gradient">
+        <h3 class="h5 fw-bold text-mute mb-4 d-flex align-items-center"> 
+          <span class="me-2">🔥</span> Популярні статті
+        </h3>
+        
+        <div class="d-flex flex-column gap-3">
+          {popularPosts.map((popPost, index) => (
+            <div class="d-flex align-items-start gap-3 pb-3 border-bottom last-border-none border-secondary">
+              <span class="fs-4 fw-bold text-primary-subtle opacity-75 lh-1" style="min-width: 20px;">
+                {/* 0{index + 1} */}
+              </span>
+              
+              <div>
+                <h4 class="h6 fw-semibold mb-1">
+                  <a href={`/blog/${popPost.slug}`} class="text-light text-decoration-none hover-primary">
+                    {popPost.title}
+                  </a>
+                </h4>
+                <div class="text-muted d-flex align-items-center gap-1" style="font-size: 0.8rem;">
+                  <span>👀 {popPost.views || 0} переглядів</span>
+                </div>
+              </div>
+            </div>
+          ))} 
+        </div>
+      </div>
+
+     <div class="card border-1  bg-transparent  rounded-4 p-4 shadow-sm mb-4">
+        <h4 class="h5 fw-bold  text-align-center mb-2">✍️Підписатись</h4>
+        <p class="small text-white-50 mb-3">Отримуйте повідомлення про нові статті прямо на пошту.</p>
+        <div class="input-group input-group-sm">
+          <input type="email" class="form-control border-0" placeholder="Ваш email" />
+          <button class="btn btn-primary" type="button">ОК</button>
+        </div>
+      </div>
+
+    </aside>
+
+  </div>
+</div>
+

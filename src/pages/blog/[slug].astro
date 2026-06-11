@@ -1,0 +1,268 @@
+---
+import { db, Post, Comment, User, Tag,PostTag, eq } from 'astro:db';
+import Layout from '../../layouts/Layout.astro';
+import { getOptimizedImage } from '../../utils/optimizeImage';
+import Menu from '../../components/Menu.astro';
+import { marked } from 'marked';
+// 1. Берем slug из параметров URL
+const { slug } = Astro.params;
+if (!slug) return Astro.redirect('/404');
+
+const { user } = Astro.locals; // Проверяем, вошел ли текущий пользователь
+
+// 2. Ищем пост в базе по его slug
+const post = await db.select().from(Post).where(eq(Post.slug, slug)).get();
+const renderedMarkdown = await marked(post?.body);
+if (!post) return Astro.redirect('/404');
+
+const tags = await db
+  .select({
+    id: Tag.id,
+    name: Tag.name
+  })
+  .from(PostTag)
+  .where(eq(PostTag.postId, post.id)) // Фильтруем только по нашему посту
+  .innerJoin(Tag, eq(PostTag.tagId, Tag.id)); // Соединяем с таблицей самих тегов
+
+// 3. Получаем все комментарии к этому посту с именами авторов (через Join)
+const comments = await db
+  .select({
+    id: Comment.id,
+    body: Comment.body,
+    authorName: User.username,
+    date: Comment.publishedAt
+  })
+  .from(Comment)
+  .innerJoin(User, eq(Comment.authorId, User.id))
+  .where(eq(Comment.postId, post.id));
+await db.update(Post)
+  .set({ views: (post.views || 0) + 1 })
+  .where(eq(Post.id, post.id));
+
+// Условие авторизации теперь привязано к существованию пользователя в сессии
+const isLoggedIn = !!user; 
+
+// ОБРАБОТКА ДЕЙСТВИЙ (POST)
+if (Astro.request.method === 'POST') {
+  // Защита: гость не пройдет в любом случае
+  if (!isLoggedIn) {
+    return new Response("Доступ заборонено!", { status: 403 });
+  }
+
+  try {
+    // ЧИТАЕМ FORM DATA СТРОГО ОДИН РАЗ ЗДЕСЬ
+    const data = await Astro.request.formData();
+    const action = data.get('_action')?.toString();
+    
+    console.log('--- ПОСТ-ЗАПРОС ПРИНЯТ ---');
+    console.log('Вызвано действие:', action);
+
+    // --- СЦЕНАРИЙ 1: УДАЛЕНИЕ КОММЕНТАРИЯ (ДЛЯ АДМИНА) ---
+    if (action === 'delete_comment') {
+      if (user.role !== 'admin') {
+        return new Response("Недостаточно прав для удаления", { status: 403 });
+      }
+
+      const commentId = data.get('commentId')?.toString();
+      if (commentId) {
+        console.log('Удаляем комментарий с ID:', commentId);
+        await db.delete(Comment).where(eq(Comment.id, commentId));
+        return Astro.redirect(`/blog/${post.slug}#comments-section`);
+      }
+    }
+
+    // --- СЦЕНАРИЙ 2: ДОБАВЛЕНИЕ НОВОГО КОММЕНТАРИЯ ---
+    if (action === 'add_comment') {
+      const body = data.get('body')?.toString();
+
+      if (body && body.trim() !== '') {
+        const newId = crypto.randomUUID();
+        console.log('Добавляем коммент с UUID:', newId);
+
+        await db.insert(Comment).values({
+          id: newId, 
+          body: body.trim(),
+          postId: post.id,       
+          authorId: user.id, 
+          publishedAt: new Date() 
+        });
+
+        return Astro.redirect(`/blog/${post.slug}#comments-section`);
+      }
+    }
+
+  } catch (error) {
+    console.error('Ошибка при обработке действий с комментариями:', error);
+  }
+}
+---
+<Layout>
+<Menu/>
+<div class="container my-5" style="max-width: 850px;">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <a href="/blog" class="btn btn-link text-decoration-none p-0 text-secondary">
+      ← Назад до блогу
+    </a>
+    <span class="text-dark small bg-light px-2 py-1 rounded">
+      👀 {post.views || 0} {post.views === 1 ? 'перегляд' : 'переглядів'}
+    </span>
+  </div>
+
+  {post.image && (
+    <div class="mb-5 overflow-hidden rounded-4 shadow-sm">
+      <img 
+        src={post.image} 
+        alt={post.title} 
+        class="img-fluid w-100 object-fit-cover" 
+        style="max-height: 350px;"
+      />
+    </div>
+  )}
+
+  <header class="mb-5 border-bottom pb-4">
+    <h1 class="display-7 fw-bold text-light mb-3">{post.title}</h1>
+
+        <div class="d-flex flex-wrap gap-2 align-items-center text-muted small">
+      <time datetime={post.publishedAt.toISOString()}>
+        🗓️ {new Date(post.publishedAt).toLocaleDateString('uk-UA', {
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric'
+        })}
+      </time>
+      
+      <span class="text-secondary-subtle">|</span>
+      
+      <div class="d-inline-flex gap-2">
+        {tags && tags.map(tag => (
+          <span class="badge text-bg-light border text-secondary px-2.5 py-1.5 rounded-pill">
+            #{tag.name}
+          </span>
+        ))}
+      </div>
+    </div>
+  </header>
+
+<article class="blog-content">
+  <div set:html={renderedMarkdown} />
+</article>
+
+<div class="d-flex flex-column gap-3">
+  {comments.length === 0 && (
+    <p class="text-muted text-center py-4 bg-body-tertiary rounded-4 border border-dashed">
+      ✨ Станьте першим, хто прокоментує цю статтю!
+    </p>
+  )}
+
+  {comments.map((comment) => (
+    <div class="comment-item p-4 bg-white border rounded-4 shadow-sm">
+      <div class="d-flex align-items-start gap-3">
+        
+        <div class="avatar-placeholder rounded-circle bg-primary-subtle text-primary d-flex align-items-center justify-content-center fw-bold flex-shrink-0" style="width: 42px; height: 42px;">
+          {comment.authorName ? comment.authorName.charAt(0).toUpperCase() : '👤'}
+        </div>
+
+        <div class="flex-grow-1">
+          {/* <div class="d-flex flex-wrap justify-content-between align-items-baseline mb-2">
+            <span class="fw-bold text-dark">{comment.authorName}</span>
+               <time class="text-muted small" datetime={comment.date.toISOString()}>
+              {new Date(comment.date).toLocaleDateString('ru-RU', {
+                day: 'numeric',
+                month: 'short',
+                hour: '2-digit',
+                minute: '2-digit'
+              })}
+            </time>
+          </div> */}
+          <div class="d-flex flex-wrap justify-content-between align-items-baseline mb-2 w-100">
+  <div>
+    <span class="fw-bold text-dark">{comment.authorName}</span>
+    {comment.authorName === user?.username && user?.role === 'admin' && (
+      <span class="badge bg-danger-subtle text-danger small ms-1 fs-xs">Адмін</span>
+    )}
+  </div>
+  
+  <div class="d-flex align-items-center gap-2">
+    <time class="text-success small" datetime={comment.date.toISOString()}>
+      {new Date(comment.date).toLocaleDateString('uk-UA', {
+        day: 'numeric',
+        month: 'short',
+        hour: '2-digit',
+        minute: '2-digit'
+      })}
+    </time>
+
+    {user?.role === 'admin' && (
+      <form method="POST" class="d-inline" onsubmit="return confirm('Видалити цей коментар безповоротно?');">
+        <input type="hidden" name="_action" value="delete_comment" />
+        <input type="hidden" name="commentId" value={comment.id} />
+     
+        <button type="submit" class="btn btn-link text-danger p-0 border-0 ms-2 lh-1" title="Видалити коментар">
+          ❌
+        </button>
+      </form>
+    )}
+  </div>
+</div>
+              <p class="text-secondary mb-0 text-comment-body">
+            {comment.body}
+          </p>
+        </div>
+
+      </div>
+    </div>
+  ))}
+</div>
+
+{isLoggedIn ? (
+    // Если пользователь вошел — выводим форму с его реальным именем
+    <div class="card border-0 bg-light rounded-4 p-4 mb-5 shadow-sm">
+      <div class="d-flex align-items-center gap-2 mb-3">
+        <span class="fs-5">✍️</span>
+        <h4 class="h6 fw-bold text-dark mb-0">
+          Ви коментуєте як <span class="text-primary fw-semibold">{user.username}</span>
+        </h4>
+      </div>
+      
+      <form method="POST" class="row g-3">
+        <input type="hidden" name="postId" value={post.id} />
+<input type="hidden" name="_action" value="add_comment" />
+        <div class="col-12">
+          <textarea 
+            class="form-control border-0 px-3 py-2.5 rounded-3 shadow-inner" 
+            id="commentText" 
+            name="body" 
+            rows="3" 
+            placeholder="Напишіть, що ви думаєте про цю статтю..." 
+            required
+          ></textarea>
+        </div>
+
+        <div class="col-12 text-end">
+          <button type="submit" class="btn btn-primary px-4 py-2 rounded-3 fw-medium" value="add_comment">
+            Відправити коментар
+          </button>
+        </div>
+      </form>
+    </div>
+  ) : (
+    // Если пользователь ГОСТЬ
+    <div class="card border-0 bg-light rounded-4 p-5 mb-5 shadow-sm text-center border border-dashed">
+      <div class="fs-2 mb-2">🔒</div>
+      <h4 class="h5 fw-bold text-dark mb-2">Обговорення доступне лише для своїх</h4>
+      <p class="text-secondary small mb-4 mx-auto" style="max-width: 400px;">
+      Щоб поділитися думкою, поставити запитання автору або взяти участь у дискусії, будь ласка, увійдіть до свого облікового запису.
+      </p>
+      <div>
+        <a href="/login" class="btn btn-outline-primary px-4 py-2 rounded-3 fw-medium">
+          Увійти або зареєструватись
+        </a>
+      </div>
+    </div>
+  )}
+
+<footer class="mt-5 pt-5 border-top text-center text-muted small">
+    <p>Дякую за читання! Якщо вам сподобалася стаття, поділіться посиланням із друзями)</p>
+  </footer>
+</div>
+   </Layout>

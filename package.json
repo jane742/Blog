@@ -1,0 +1,26 @@
+{
+  "name": "blog",
+  "type": "module",
+  "version": "0.0.1",
+  "scripts": {
+    "dev": "astro dev",
+    "start": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "astro": "astro",
+    "db:push": "astro db push --remote",
+    "db:seed": "astro db execute src/db/seed.ts --remote"
+  },
+  "dependencies": {
+    "@astrojs/db": "^0.18.3",
+    "@astrojs/node": "^9.5.2",
+    "@libsql/client": "^0.17.0",
+    "@lucia-auth/adapter-drizzle": "^1.1.0",
+    "astro": "^5.16.9",
+    "cloudinary": "^2.10.0",
+    "lucia": "^3.2.2",
+    "marked": "^18.0.3",
+    "oslo": "^1.2.1",
+    "slugify": "^1.6.9"
+  }
+}
