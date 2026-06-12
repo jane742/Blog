@@ -1,15 +1,9 @@
-
-
 {
   "extends": "astro/tsconfigs/strict",
-  "include": [
-    "src/**/*",
-    "env.d.ts",
-    ".astro/types.d.ts" 
-  ],
- "compilerOptions": {
+  "compilerOptions": {
     "skipLibCheck": true,
     "checkJs": false,
-    "allowJs": true
-  } 
+    "allowJs": true,
+    "moduleResolution": "bundler"
+  }
 }
