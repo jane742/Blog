@@ -7,14 +7,13 @@ export default defineConfig({
   adapter: vercel(),
   integrations: [db()],
   vite: {
-    // Цей блок виправляє баг сумісності екосистеми Astro 5 з сервером Vercel
+    // Повністю виключаємо astro та його інтеграції з оптимізації Vite CommonJS
     ssr: {
-      external: ['astro']
+      noExternal: [],
+      external: ['astro', '@astrojs/db']
     },
-    resolve: {
-      alias: {
-        'astro/app/entrypoint': 'astro/dist/app/entrypoint.js'
-      }
+    optimizeDeps: {
+      exclude: ['astro', '@astrojs/db']
     }
   }
 });
