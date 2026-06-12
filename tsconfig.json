@@ -4,6 +4,6 @@
     "skipLibCheck": true,
     "checkJs": false,
     "allowJs": true,
-    "moduleResolution": "bundler"
+    "moduleResolution": "node"
   }
 }

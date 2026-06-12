@@ -424,7 +424,7 @@ body {
 /* Основной контейнер с темным градиентом */
 .hero-bg-wrapper {
   /* Градиент идет из верхнего правого угла (к картинке) в нижний левый */
-  background: radial-gradient(circle at 80% 20%, #1e1b4b 0%, #0f172a 100%);
+  background: radial-gradient(circle at 80% 20%, #29255e 0%, #010819 100%);
   background-color: #0f172a;
 }
 
@@ -498,20 +498,20 @@ body {
 }
 .glass-panel {
   /* 1. Напівпрозорий фон (обов'язково через rgba, де остання цифра — прозорість від 0 до 1) */
-  background: rgba(18, 24, 36, 0.55);
+  background: rgba(84, 109, 159, 0.15);
 
   /* 2. ГОЛОВНА ВЛАСТИВІСТЬ: Розмиття всього, що знаходиться ПОЗАДУ панелі */
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px); /* Підтримка для старих версій Safari */
+  backdrop-filter: blur(52px);
+  -webkit-backdrop-filter: blur(72px); /* Підтримка для старих версій Safari */
 
   /* 3. Тонка світла рамка, яка створює ефект "зрізу скляної пластини" */
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 3px solid rgba(255, 255, 255, 0.08);
 
   /* 4. М'яке закруглення кутів */
   border-radius: 12px;
 
   /* 5. Легка тінь для об'єму (ефект підняття над поверхнею) */
-  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.86);
 
   /* Додаткові стилі для тексту всередині */
   color: #f8f9fa;

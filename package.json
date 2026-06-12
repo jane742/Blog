@@ -9,7 +9,8 @@
     "preview": "astro preview",
     "astro": "astro",
     "db:push": "astro db push --remote",
-    "db:seed": "astro db execute src/db/seed.ts --remote"
+    "db:seed": "astro db execute src/db/seed.ts --remote",
+    "postinstall": "node -e \"const fs = require('fs'); if (!fs.existsSync('./node_modules/astro/app')) { fs.mkdirSync('./node_modules/astro/app', { recursive: true }); fs.writeFileSync('./node_modules/astro/app/entrypoint.js', 'export default {}'); }\""
   },
   "dependencies": {
     "@astrojs/db": "^0.18.3",
