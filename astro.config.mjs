@@ -6,14 +6,11 @@ export default defineConfig({
   output: 'server', 
   adapter: vercel(),
   integrations: [db()],
-  vite: {
-    // Повністю виключаємо astro та його інтеграції з оптимізації Vite CommonJS
-    ssr: {
-      noExternal: [],
-      external: ['astro', '@astrojs/db']
-    },
-    optimizeDeps: {
-      exclude: ['astro', '@astrojs/db']
+vite: {
+    resolve: {
+      alias: {
+        'astro/app/entrypoint': 'astro/dist/core/app/index.js' // Новий шлях в Astro 5
+      }
     }
   }
 });
