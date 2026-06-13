@@ -1,7 +1,7 @@
 import { c as createComponent } from './astro-component_D0R2L729.mjs';
 import 'piccolore';
 import { I as renderTemplate, u as maybeRenderHead, F as Fragment } from './sequence_5gyAyBy_.mjs';
-import { r as renderComponent } from './entrypoint_D61pzee8.mjs';
+import { r as renderComponent } from './entrypoint_CXH78Uga.mjs';
 import { $ as $$Layout } from './Layout_DFa18sRI.mjs';
 
 const $$Menu = createComponent(($$result, $$props, $$slots) => {

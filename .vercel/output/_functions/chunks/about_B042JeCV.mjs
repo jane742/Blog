@@ -1,10 +1,10 @@
 import { c as createComponent } from './astro-component_D0R2L729.mjs';
 import 'piccolore';
 import { I as renderTemplate } from './sequence_5gyAyBy_.mjs';
-import { r as renderComponent } from './entrypoint_D61pzee8.mjs';
+import { r as renderComponent } from './entrypoint_CXH78Uga.mjs';
 import 'clsx';
 import { $ as $$Layout } from './Layout_DFa18sRI.mjs';
-import { $ as $$Menu } from './Menu_D4CLu_NK.mjs';
+import { $ as $$Menu } from './Menu_bpey7TDX.mjs';
 
 const $$Welcome = createComponent(($$result, $$props, $$slots) => {
   return renderTemplate``;

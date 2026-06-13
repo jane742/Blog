@@ -1,7 +1,7 @@
 import { c as createComponent } from './astro-component_D0R2L729.mjs';
 import 'piccolore';
 import { I as renderTemplate, u as maybeRenderHead } from './sequence_5gyAyBy_.mjs';
-import { r as renderComponent } from './entrypoint_D61pzee8.mjs';
+import { r as renderComponent } from './entrypoint_CXH78Uga.mjs';
 import { $ as $$Layout, r as renderScript } from './Layout_DFa18sRI.mjs';
 import { l as lucia } from './auth_BNOajhtQ.mjs';
 import { generateIdFromEntropySize } from 'lucia';
