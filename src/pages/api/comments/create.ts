@@ -1,4 +1,4 @@
-import { db, Comment } from "astro:db";
+import { db, Comment } from '../../../../db/config';
 import { generateId } from "lucia";
 
 export async function POST(context: any) {

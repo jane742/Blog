@@ -2,7 +2,7 @@
 import { lucia } from "../auth";
 import { generateIdFromEntropySize } from "lucia";
 import { Scrypt } from "oslo/password";
-import { db, User } from "astro:db";
+import { db, User } from '../../db/config';
 import Layout from "../layouts/Layout.astro";
 const scrypt = new Scrypt();
 let errorMessage = "";

@@ -1,5 +1,7 @@
 ---
-import { db, Post, Comment, User, Tag,PostTag, eq } from 'astro:db';
+import { db, Post, Comment, User, Tag,PostTag} from '../../../db/config';
+import { eq } from 'drizzle-orm';
+
 import Layout from '../../layouts/Layout.astro';
 import { getOptimizedImage } from '../../utils/optimizeImage';
 import Menu from '../../components/Menu.astro';
@@ -123,13 +125,13 @@ if (Astro.request.method === 'POST') {
     <h1 class="display-7 fw-bold text-light mb-3">{post.title}</h1>
 
         <div class="d-flex flex-wrap gap-2 align-items-center text-muted small">
-      <time datetime={post.publishedAt.toISOString()}>
-        🗓️ {new Date(post.publishedAt).toLocaleDateString('uk-UA', {
-          year: 'numeric',
-          month: 'long',
-          day: 'numeric'
-        })}
-      </time>
+      <time datetime={new Date(post.publishedAt).toISOString()}>
+  🗓️ {new Date(post.publishedAt).toLocaleDateString('uk-UA', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric'
+  })}
+</time>
       
       <span class="text-secondary-subtle">|</span>
       

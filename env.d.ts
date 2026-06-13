@@ -1,5 +1,5 @@
 /// <reference types="astro/client" />
-/// <reference types="@astrojs/db" />
+
 declare namespace App {
     interface Locals {
         user: import("lucia").User | null;

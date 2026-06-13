@@ -1,6 +1,7 @@
 ---
 import { lucia } from "../auth";
-import { db, User, eq } from "astro:db";
+import { db, User } from '../../db/config';
+import { eq, count, desc  } from 'drizzle-orm';
 import { Scrypt } from "oslo/password";
 import Layout from "../layouts/Layout.astro";
 let errorMessage = "";

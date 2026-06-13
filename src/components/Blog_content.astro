@@ -2,7 +2,8 @@
 import Layout from '../layouts/Layout.astro';
 import Menu from '../components/Menu.astro';
 import { marked } from 'marked';
-import { db, Post, PostTag, Tag, User,desc, count,eq,like,sql,or} from 'astro:db';
+import { db, User, Tag,Post, PostTag, Comment } from '../../db/config';
+import { count,eq,desc } from 'drizzle-orm';
 
 
 // 1. Определяем текущую страницу из URL (например, /?page=2). Если параметра нет — это 1 страница.
@@ -202,13 +203,13 @@ function cleanMarkdown(rawText: string | null): string {
 
              <div class="flex-grow-1">
               <div class="d-flex flex-wrap align-items-center gap-2 text-muted small mb-2">
-                <time datetime={post.publishedAt.toISOString()}>
-                  🗓️ {new Date(post.publishedAt).toLocaleDateString('uk-UA', {
-                    day: 'numeric',
-                    month: 'long',
-                    year: 'numeric'
-                  })}
-                </time>
+               <time datetime={new Date(post.publishedAt).toISOString()}>
+  🗓️ {new Date(post.publishedAt).toLocaleDateString('uk-UA', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric'
+  })}
+</time>
                 <span>•</span>
                 <span>✍️ {post.authorName}</span> <span>•</span>
                 <span>👀 {post.views || 0}</span>

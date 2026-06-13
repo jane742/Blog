@@ -1,6 +1,6 @@
 import { Lucia } from "lucia";
 import { DrizzleSQLiteAdapter } from "@lucia-auth/adapter-drizzle";
-import { db, User, Session } from 'astro:db';
+import { db, User, Session } from '../db/config';
 
 
 const adapter = new DrizzleSQLiteAdapter(

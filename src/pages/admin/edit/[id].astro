@@ -1,5 +1,6 @@
 ---
-import { db, Post, Tag, PostTag,eq } from 'astro:db';
+import { db, Post, Tag, PostTag } from '../../../../db/config';
+import { eq } from 'drizzle-orm';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import Layout from '../../../layouts/Layout.astro';

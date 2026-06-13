@@ -1,5 +1,6 @@
 ---
-import { db, Post, PostTag, Tag, eq } from "astro:db";
+import { db, Post, PostTag, Tag } from '../../../db/config';
+import { eq } from 'drizzle-orm';
 import Layout from "../../layouts/Layout.astro";
 import Menu from "../../components/Menu.astro";
 const { user } = Astro.locals;
@@ -143,11 +144,11 @@ const totalViews = posts.reduce((sum, post) => {
                   </td>
 
                   <td class="py-3 text-muted small">
-                    {post.publishedAt.toLocaleDateString("ru-RU", {
-                      day: "numeric",
-                      month: "short",
-                      year: "numeric",
-                    })}
+                    {new Date(post.publishedAt).toLocaleDateString("uk-UA", {
+  day: "numeric",
+  month: "short",
+  year: "numeric",
+})}
                   </td>
 
                   <td class="py-3 text-center">

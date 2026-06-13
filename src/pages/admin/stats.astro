@@ -1,5 +1,6 @@
 ---
-import { db, Post, Comment, User, eq, count, desc } from 'astro:db';
+import { db, Post, Comment, User } from '../../../db/config';
+import { eq, count, desc  } from 'drizzle-orm';
 import Layout from '../../layouts/Layout.astro';
 import Menu from '../../components/Menu.astro';
 const { user } = Astro.locals;

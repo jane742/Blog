@@ -1,4 +1,5 @@
-import { db, Post, PostTag, Comment, eq } from 'astro:db';
+import { db, Post, PostTag, Comment } from '../../../../db/config';
+import { eq, count, desc  } from 'drizzle-orm';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 

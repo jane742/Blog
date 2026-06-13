@@ -1,5 +1,6 @@
 ---
-import { db, Post, Tag, PostTag, eq } from 'astro:db';
+import { db, Post, Tag, PostTag} from '../../../db/config';
+import { eq, count, desc  } from 'drizzle-orm';
 import Layout from '../../layouts/Layout.astro';
 import Menu from '../../components/Menu.astro';
 const { tag } = Astro.params;
