@@ -46,10 +46,16 @@ export const PostTag = sqliteTable('PostTag', {
 });
 
 // 2. ИНИЦИАЛИЗАЦИЯ КЛИЕНТА ДЛЯ СВЯЗИ С TURSO
-const client = createClient({
-  url: import.meta.env.TURSO_DATABASE_URL || import.meta.env.ASTRO_DB_REMOTE_URL || process.env.TURSO_DATABASE_URL!,
-  authToken: import.meta.env.TURSO_AUTH_TOKEN || import.meta.env.ASTRO_DB_APP_TOKEN || process.env.TURSO_AUTH_TOKEN!,
-});
+const databaseUrl = import.meta.env.TURSO_DATABASE_URL || import.meta.env.ASTRO_DB_REMOTE_URL || process.env.TURSO_DATABASE_URL || '';
+const authToken = import.meta.env.TURSO_AUTH_TOKEN || import.meta.env.ASTRO_DB_APP_TOKEN || process.env.TURSO_AUTH_TOKEN || '';
 
+if (!databaseUrl) {
+  console.error("⚠️ КРИТИЧНА ПОМИЛКА: URL бази даних не знайдено в змінних оточення!");
+}
+
+const client = createClient({
+  url: databaseUrl,
+  authToken: authToken,
+});
 // ГЛАВНЫЙ ЭКСПОРТ ДЛЯ ЗАПРОСОВ (db)
 export const db = drizzle(client);
