@@ -1,15 +1,10 @@
 import { defineConfig } from 'astro/config';
-import vercel from '@astrojs/vercel';
+import vercel from '@astrojs/vercel/serverless'; // Переконайся, що імпорт саме такий!
 
 export default defineConfig({
-  output: 'server', 
-  adapter: vercel(),
-  vite: {
-    resolve: {
-      // Якщо хтось (Lucia) шукає astro:db, ми підсовуємо йому пусту заглушку
-      alias: {
-        'astro:db': 'astro/runtime/server/index.js' 
-      }
-    }
-  }
+  output: 'server', // або 'hybrid', залежно від твого проєкту
+  adapter: vercel({
+    // Це змусить старіший адаптер створювати правильну структуру для сучасного Vercel
+    edgeMiddleware: false, 
+  }),
 });
