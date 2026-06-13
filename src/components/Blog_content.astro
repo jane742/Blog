@@ -3,7 +3,7 @@ import Layout from '../layouts/Layout.astro';
 import Menu from '../components/Menu.astro';
 import { marked } from 'marked';
 import { db, User, Tag,Post, PostTag, Comment } from '../../db/config';
-import { count,eq,desc } from 'drizzle-orm';
+import { count,eq,desc, or,like,and } from 'drizzle-orm';
 
 
 // 1. Определяем текущую страницу из URL (например, /?page=2). Если параметра нет — это 1 страница.
@@ -32,17 +32,27 @@ let countQuery = db
   .from(Post);
 
 // Если есть поиск, считаем только те статьи, которые подходят под условие
+// 1. Создаем массив для динамических условий (фильтров)
+const filters = [];
+
+// Если есть поисковый запрос, добавляем условия в массив
 if (searchQuery !== '') {
-countQuery = countQuery.where(
+  filters.push(
     or(
       like(Post.title, `%${searchLower}%`),       // Ищет "астро"
       like(Post.title, `%${searchCapitalized}%`)  // Ищет "Астро"
     )
   );
 }
+const countResult = await db
+  .select({ total: count() }) // или sql<number>`count(*)` в зависимости от вашей версии
+  .from(Post)
+  .where(filters.length > 0 ? and(...filters) : undefined);
 
+// Получаем итоговое число (обычно countResult[0].total)
+const totalRows = countResult[0]?.total ?? 0;
 // Получаем итоговую цифру (например, 12)
-const countResult = await countQuery;
+// const countResult = await countQuery;
 const totalPosts = countResult[0]?.total || 0;
 
 // Вычисляем общее количество страниц для пагинации
@@ -66,23 +76,27 @@ let postsQuery = db
   .from(Post)
   .innerJoin(User, eq(Post.authorId, User.id));
 
-// Применяем точно такое же условие поиска к списку статей
-if (searchQuery !== '') {
-postsQuery = postsQuery.where(
-    or(
-      like(Post.title, `%${searchLower}%`),
-      like(Post.title, `%${searchCapitalized}%`)
-    )
-  );
-}
-
-// Применяем сортировку и пагинацию к отфильтрованным результатам
-const allPosts = await postsQuery
+// ОБ'ЄДНУЄМО: Вибір полів + Пошук + Сортування + Пагинація
+const allPosts = await db
+  .select({
+    id: Post.id,
+    title: Post.title,
+    slug: Post.slug,
+    body: Post.body,
+    image: Post.image,
+    publishedAt: Post.publishedAt,
+    views: Post.views,
+    authorName: User.username // Сюди потрапляє ім'я автора
+  })
+  .from(Post)
+  .innerJoin(User, eq(Post.authorId, User.id))
+  // Застосовуємо масив фільтрів пошуку (якщо він не пустий)
+  .where(filters.length > 0 ? and(...filters) : undefined)
+  // Сортуємо
   .orderBy(desc(Post.publishedAt))
+  // Обмежуємо для пагинації
   .limit(postsPerPage)
   .offset(offset);
-
-
 
 
   // 2. Получаем топ-3 популярных постов по количеству просмотров

@@ -1,5 +1,5 @@
 
-import { db, User, Post,Session,Comment } from 'astro:db';
+import { db, User, Post,Session,Comment } from '../db/config';
 import { Scrypt } from "oslo/password";
 
 export default async function seed() {

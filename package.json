@@ -11,7 +11,7 @@
     "db:push": "drizzle-kit push"
   },
   "dependencies": {
-    "@astrojs/vercel": "^10.0.8",
+    "@astrojs/vercel": "^9.0.5",
     "@libsql/client": "^0.17.0",
     "@lucia-auth/adapter-drizzle": "^1.1.0",
     "astro": "^5.16.9",
@@ -20,9 +20,12 @@
     "lucia": "^3.2.2",
     "marked": "^18.0.3",
     "oslo": "^1.2.1",
-    "slugify": "^1.6.9"
+    "slugify": "^1.6.9",
+    "zod": "^4.4.3"
   },
   "devDependencies": {
-    "drizzle-kit": "^0.30.0"
+    "@astrojs/check": "^0.9.9",
+    "drizzle-kit": "^0.30.0",
+    "typescript": "^6.0.3"
   }
 }

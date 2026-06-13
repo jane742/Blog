@@ -31,7 +31,7 @@ export async function POST(context: any) {
       body: body,
       postId: postId,
       authorId: user.id,
-      publishedAt: new Date()
+     publishedAt: new Date().toISOString() // ИСПРАВЛЕНО: добавили .toISOString()
     });
 
     // 5. Возвращаем пользователя обратно на страницу поста

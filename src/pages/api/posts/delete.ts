@@ -2,10 +2,11 @@ import { db, Post, PostTag, Comment } from '../../../../db/config';
 import { eq, count, desc  } from 'drizzle-orm';
 import fs from 'node:fs/promises';
 import path from 'node:path';
+import type { APIContext } from 'astro';
 
-export async function POST({ request, locals, redirect }) {
+export async function POST({ request, locals, redirect }: APIContext) {
   const user = locals.user;
-  
+    
   // 1. Проверка прав
   if (!user || user.role !== 'admin') {
     return new Response("Доступ запрещен", { status: 403 });
