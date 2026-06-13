@@ -1,15 +1,15 @@
-import { e as createComponent, k as renderComponent, r as renderTemplate, h as createAstro, m as maybeRenderHead, l as renderScript } from '../chunks/astro/server_rOUT-VGP.mjs';
+import { c as createComponent } from './astro-component_D0R2L729.mjs';
 import 'piccolore';
-import { l as lucia } from '../chunks/auth_BNOajhtQ.mjs';
-import { d as db, U as User } from '../chunks/config_CudtQ6iI.mjs';
+import { I as renderTemplate, u as maybeRenderHead } from './sequence_5gyAyBy_.mjs';
+import { r as renderComponent } from './entrypoint_D61pzee8.mjs';
+import { $ as $$Layout, r as renderScript } from './Layout_DFa18sRI.mjs';
+import { l as lucia } from './auth_BNOajhtQ.mjs';
+import { d as db, U as User } from './config_CudtQ6iI.mjs';
 import { eq } from 'drizzle-orm';
 import { Scrypt } from 'oslo/password';
-import { $ as $$Layout } from '../chunks/Layout_kW219FBg.mjs';
-export { renderers } from '../renderers.mjs';
 
-const $$Astro = createAstro();
 const $$Login = createComponent(async ($$result, $$props, $$slots) => {
-  const Astro2 = $$result.createAstro($$Astro, $$props, $$slots);
+  const Astro2 = $$result.createAstro($$props, $$slots);
   Astro2.self = $$Login;
   let errorMessage = "";
   if (Astro2.request.method === "POST") {
@@ -17,11 +17,11 @@ const $$Login = createComponent(async ($$result, $$props, $$slots) => {
     const username = formData.get("username");
     const password = formData.get("password");
     if (typeof username !== "string" || typeof password !== "string") {
-      errorMessage = "\u041D\u0435\u0432\u0456\u0440\u043D\u0456 \u0434\u0430\u043D\u0456";
+      errorMessage = "Невірні дані";
     } else {
       const existingUser = await db.select().from(User).where(eq(User.username, username)).get();
       if (!existingUser) {
-        errorMessage = "\u041D\u0435\u0432\u0456\u0440\u043D\u0435 \u0456\u043C'\u044F \u043A\u043E\u0440\u0438\u0441\u0442\u0443\u0432\u0430\u0447\u0430 \u0430\u0431\u043E \u043F\u0430\u0440\u043E\u043B\u044C";
+        errorMessage = "Невірне ім'я користувача або пароль";
       } else {
         const scrypt = new Scrypt();
         const validPassword = await scrypt.verify(
@@ -29,9 +29,9 @@ const $$Login = createComponent(async ($$result, $$props, $$slots) => {
           password
         );
         if (!validPassword) {
-          errorMessage = "\u041D\u0435\u0432\u0456\u0440\u043D\u0435 \u0456\u043C'\u044F \u043A\u043E\u0440\u0438\u0441\u0442\u0443\u0432\u0430\u0447\u0430 \u0430\u0431\u043E \u043F\u0430\u0440\u043E\u043B\u044C";
+          errorMessage = "Невірне ім'я користувача або пароль";
         } else {
-          console.log("ID \u043F\u043E\u043B\u044C\u0437\u043E\u0432\u0430\u0442\u0435\u043B\u044F:", existingUser.id);
+          console.log("ID пользователя:", existingUser.id);
           const session = await lucia.createSession(existingUser.id, {});
           const sessionCookie = lucia.createSessionCookie(session.id);
           Astro2.cookies.set(

@@ -1,9 +1,6 @@
 import { l as lucia } from './chunks/auth_BNOajhtQ.mjs';
-import { e as defineMiddleware, s as sequence } from './chunks/render-context_KySmss7T.mjs';
-import 'es-module-lexer';
-import './chunks/astro-designed-error-pages_C4ngcWkh.mjs';
+import { d as defineMiddleware, s as sequence } from './chunks/sequence_5gyAyBy_.mjs';
 import 'piccolore';
-import './chunks/astro/server_rOUT-VGP.mjs';
 import 'clsx';
 
 const onRequest$1 = defineMiddleware(async (context, next) => {

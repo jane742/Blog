@@ -1,6 +1,5 @@
-import { d as db, C as Comment } from '../../../chunks/config_CudtQ6iI.mjs';
+import { d as db, C as Comment } from './config_CudtQ6iI.mjs';
 import { generateId } from 'lucia';
-export { renderers } from '../../../renderers.mjs';
 
 async function POST(context) {
   const session = context.locals.session;

@@ -1,11 +1,11 @@
-import { e as createComponent, k as renderComponent, r as renderTemplate, h as createAstro, m as maybeRenderHead, n as Fragment } from './astro/server_rOUT-VGP.mjs';
+import { c as createComponent } from './astro-component_D0R2L729.mjs';
 import 'piccolore';
-/* empty css                         */
-import { $ as $$Layout } from './Layout_kW219FBg.mjs';
+import { I as renderTemplate, u as maybeRenderHead, F as Fragment } from './sequence_5gyAyBy_.mjs';
+import { r as renderComponent } from './entrypoint_D61pzee8.mjs';
+import { $ as $$Layout } from './Layout_DFa18sRI.mjs';
 
-const $$Astro = createAstro();
 const $$Menu = createComponent(($$result, $$props, $$slots) => {
-  const Astro2 = $$result.createAstro($$Astro, $$props, $$slots);
+  const Astro2 = $$result.createAstro($$props, $$slots);
   Astro2.self = $$Menu;
   const { user } = Astro2.locals;
   const isAdmin = user?.role === "admin";

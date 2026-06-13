@@ -11,10 +11,10 @@
     "db:push": "drizzle-kit push"
   },
   "dependencies": {
-    "@astrojs/vercel": "^9.0.5",
+    "@astrojs/vercel": "^10.0.8",
     "@libsql/client": "^0.17.0",
     "@lucia-auth/adapter-drizzle": "^1.1.0",
-    "astro": "^5.16.9",
+    "astro": "^6.4.6",
     "cloudinary": "^2.10.0",
     "drizzle-orm": "^0.45.2",
     "lucia": "^3.2.2",

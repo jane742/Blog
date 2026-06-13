@@ -1,15 +1,15 @@
-import { e as createComponent, k as renderComponent, r as renderTemplate, h as createAstro, m as maybeRenderHead, g as addAttribute, u as unescapeHTML } from '../../chunks/astro/server_rOUT-VGP.mjs';
+import { c as createComponent } from './astro-component_D0R2L729.mjs';
 import 'piccolore';
-import { d as db, P as Post, T as Tag, a as PostTag, C as Comment, U as User } from '../../chunks/config_CudtQ6iI.mjs';
+import { I as renderTemplate, u as maybeRenderHead, _ as addAttribute, bg as unescapeHTML } from './sequence_5gyAyBy_.mjs';
+import { r as renderComponent } from './entrypoint_D61pzee8.mjs';
+import { d as db, P as Post, T as Tag, a as PostTag, C as Comment, U as User } from './config_CudtQ6iI.mjs';
 import { eq } from 'drizzle-orm';
-import { $ as $$Layout } from '../../chunks/Layout_kW219FBg.mjs';
-import { $ as $$Menu } from '../../chunks/Menu_Bh_G5M9m.mjs';
+import { $ as $$Layout } from './Layout_DFa18sRI.mjs';
+import { $ as $$Menu } from './Menu_D4CLu_NK.mjs';
 import { marked } from 'marked';
-export { renderers } from '../../renderers.mjs';
 
-const $$Astro = createAstro();
 const $$slug = createComponent(async ($$result, $$props, $$slots) => {
-  const Astro2 = $$result.createAstro($$Astro, $$props, $$slots);
+  const Astro2 = $$result.createAstro($$props, $$slots);
   Astro2.self = $$slug;
   const { slug } = Astro2.params;
   if (!slug) return Astro2.redirect("/404");
@@ -31,20 +31,20 @@ const $$slug = createComponent(async ($$result, $$props, $$slots) => {
   const isLoggedIn = !!user;
   if (Astro2.request.method === "POST") {
     if (!isLoggedIn) {
-      return new Response("\u0414\u043E\u0441\u0442\u0443\u043F \u0437\u0430\u0431\u043E\u0440\u043E\u043D\u0435\u043D\u043E!", { status: 403 });
+      return new Response("Доступ заборонено!", { status: 403 });
     }
     try {
       const data = await Astro2.request.formData();
       const action = data.get("_action")?.toString();
-      console.log("--- \u041F\u041E\u0421\u0422-\u0417\u0410\u041F\u0420\u041E\u0421 \u041F\u0420\u0418\u041D\u042F\u0422 ---");
-      console.log("\u0412\u044B\u0437\u0432\u0430\u043D\u043E \u0434\u0435\u0439\u0441\u0442\u0432\u0438\u0435:", action);
+      console.log("--- ПОСТ-ЗАПРОС ПРИНЯТ ---");
+      console.log("Вызвано действие:", action);
       if (action === "delete_comment") {
         if (user.role !== "admin") {
-          return new Response("\u041D\u0435\u0434\u043E\u0441\u0442\u0430\u0442\u043E\u0447\u043D\u043E \u043F\u0440\u0430\u0432 \u0434\u043B\u044F \u0443\u0434\u0430\u043B\u0435\u043D\u0438\u044F", { status: 403 });
+          return new Response("Недостаточно прав для удаления", { status: 403 });
         }
         const commentId = data.get("commentId")?.toString();
         if (commentId) {
-          console.log("\u0423\u0434\u0430\u043B\u044F\u0435\u043C \u043A\u043E\u043C\u043C\u0435\u043D\u0442\u0430\u0440\u0438\u0439 \u0441 ID:", commentId);
+          console.log("Удаляем комментарий с ID:", commentId);
           await db.delete(Comment).where(eq(Comment.id, commentId));
           return Astro2.redirect(`/blog/${post.slug}#comments-section`);
         }
@@ -53,7 +53,7 @@ const $$slug = createComponent(async ($$result, $$props, $$slots) => {
         const body = data.get("body")?.toString();
         if (body && body.trim() !== "") {
           const newId = crypto.randomUUID();
-          console.log("\u0414\u043E\u0431\u0430\u0432\u043B\u044F\u0435\u043C \u043A\u043E\u043C\u043C\u0435\u043D\u0442 \u0441 UUID:", newId);
+          console.log("Добавляем коммент с UUID:", newId);
           await db.insert(Comment).values({
             id: newId,
             body: body.trim(),
@@ -66,13 +66,13 @@ const $$slug = createComponent(async ($$result, $$props, $$slots) => {
         }
       }
     } catch (error) {
-      console.error("\u041E\u0448\u0438\u0431\u043A\u0430 \u043F\u0440\u0438 \u043E\u0431\u0440\u0430\u0431\u043E\u0442\u043A\u0435 \u0434\u0435\u0439\u0441\u0442\u0432\u0438\u0439 \u0441 \u043A\u043E\u043C\u043C\u0435\u043D\u0442\u0430\u0440\u0438\u044F\u043C\u0438:", error);
+      console.error("Ошибка при обработке действий с комментариями:", error);
     }
   }
   return renderTemplate`${renderComponent($$result, "Layout", $$Layout, {}, { "default": async ($$result2) => renderTemplate` ${renderComponent($$result2, "Menu", $$Menu, {})} ${maybeRenderHead()}<div class="container my-5" style="max-width: 850px;"> <div class="d-flex justify-content-between align-items-center mb-4"> <a href="/blog" class="btn btn-link text-decoration-none p-0 text-secondary">
 ← Назад до блогу
 </a> <span class="text-dark small bg-light px-2 py-1 rounded">
-👀 ${post.views || 0} ${post.views === 1 ? "\u043F\u0435\u0440\u0435\u0433\u043B\u044F\u0434" : "\u043F\u0435\u0440\u0435\u0433\u043B\u044F\u0434\u0456\u0432"} </span> </div> ${post.image && renderTemplate`<div class="mb-5 overflow-hidden rounded-4 shadow-sm"> <img${addAttribute(post.image, "src")}${addAttribute(post.title, "alt")} class="img-fluid w-100 object-fit-cover" style="max-height: 350px;"> </div>`} <header class="mb-5 border-bottom pb-4"> <h1 class="display-7 fw-bold text-light mb-3">${post.title}</h1> <div class="d-flex flex-wrap gap-2 align-items-center text-muted small"> <time${addAttribute(new Date(post.publishedAt).toISOString(), "datetime")}>
+👀 ${post.views || 0} ${post.views === 1 ? "перегляд" : "переглядів"} </span> </div> ${post.image && renderTemplate`<div class="mb-5 overflow-hidden rounded-4 shadow-sm"> <img${addAttribute(post.image, "src")}${addAttribute(post.title, "alt")} class="img-fluid w-100 object-fit-cover" style="max-height: 350px;"> </div>`} <header class="mb-5 border-bottom pb-4"> <h1 class="display-7 fw-bold text-light mb-3">${post.title}</h1> <div class="d-flex flex-wrap gap-2 align-items-center text-muted small"> <time${addAttribute(new Date(post.publishedAt).toISOString(), "datetime")}>
 🗓️ ${new Date(post.publishedAt).toLocaleDateString("uk-UA", {
     day: "numeric",
     month: "long",
@@ -80,7 +80,7 @@ const $$slug = createComponent(async ($$result, $$props, $$slots) => {
   })} </time> <span class="text-secondary-subtle">|</span> <div class="d-inline-flex gap-2"> ${tags && tags.map((tag) => renderTemplate`<span class="badge text-bg-light border text-secondary px-2.5 py-1.5 rounded-pill">
 #${tag.name} </span>`)} </div> </div> </header> <article class="blog-content"> <div>${unescapeHTML(renderedMarkdown)}</div> </article> <div class="d-flex flex-column gap-3"> ${comments.length === 0 && renderTemplate`<p class="text-muted text-center py-4 bg-body-tertiary rounded-4 border border-dashed">
 ✨ Станьте першим, хто прокоментує цю статтю!
-</p>`} ${comments.map((comment) => renderTemplate`<div class="comment-item p-4 bg-white border rounded-4 shadow-sm"> <div class="d-flex align-items-start gap-3"> <div class="avatar-placeholder rounded-circle bg-primary-subtle text-primary d-flex align-items-center justify-content-center fw-bold flex-shrink-0" style="width: 42px; height: 42px;"> ${comment.authorName ? comment.authorName.charAt(0).toUpperCase() : "\u{1F464}"} </div> <div class="flex-grow-1">  <div class="d-flex flex-wrap justify-content-between align-items-baseline mb-2 w-100"> <div> <span class="fw-bold text-dark">${comment.authorName}</span> ${comment.authorName === user?.username && user?.role === "admin" && renderTemplate`<span class="badge bg-danger-subtle text-danger small ms-1 fs-xs">Адмін</span>`} </div> <div class="d-flex align-items-center gap-2"> <time class="text-success small"${addAttribute(comment.date, "datetime")}> ${new Date(comment.date).toLocaleDateString("uk-UA", {
+</p>`} ${comments.map((comment) => renderTemplate`<div class="comment-item p-4 bg-white border rounded-4 shadow-sm"> <div class="d-flex align-items-start gap-3"> <div class="avatar-placeholder rounded-circle bg-primary-subtle text-primary d-flex align-items-center justify-content-center fw-bold flex-shrink-0" style="width: 42px; height: 42px;"> ${comment.authorName ? comment.authorName.charAt(0).toUpperCase() : "👤"} </div> <div class="flex-grow-1">  <div class="d-flex flex-wrap justify-content-between align-items-baseline mb-2 w-100"> <div> <span class="fw-bold text-dark">${comment.authorName}</span> ${comment.authorName === user?.username && user?.role === "admin" && renderTemplate`<span class="badge bg-danger-subtle text-danger small ms-1 fs-xs">Адмін</span>`} </div> <div class="d-flex align-items-center gap-2"> <time class="text-success small"${addAttribute(comment.date, "datetime")}> ${new Date(comment.date).toLocaleDateString("uk-UA", {
     day: "numeric",
     month: "short",
     hour: "2-digit",

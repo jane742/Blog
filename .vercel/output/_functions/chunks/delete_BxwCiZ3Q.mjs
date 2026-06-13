@@ -1,8 +1,7 @@
-import { d as db, a as PostTag, C as Comment, P as Post } from '../../../chunks/config_CudtQ6iI.mjs';
+import { d as db, a as PostTag, C as Comment, P as Post } from './config_CudtQ6iI.mjs';
 import { eq } from 'drizzle-orm';
 import fs from 'node:fs/promises';
 import nodePath from 'node:path';
-export { renderers } from '../../../renderers.mjs';
 
 async function POST({ request, locals, redirect }) {
   const user = locals.user;

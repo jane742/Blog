@@ -1,15 +1,15 @@
-import { e as createComponent, k as renderComponent, r as renderTemplate, h as createAstro, m as maybeRenderHead, l as renderScript } from '../chunks/astro/server_rOUT-VGP.mjs';
+import { c as createComponent } from './astro-component_D0R2L729.mjs';
 import 'piccolore';
-import { l as lucia } from '../chunks/auth_BNOajhtQ.mjs';
+import { I as renderTemplate, u as maybeRenderHead } from './sequence_5gyAyBy_.mjs';
+import { r as renderComponent } from './entrypoint_D61pzee8.mjs';
+import { $ as $$Layout, r as renderScript } from './Layout_DFa18sRI.mjs';
+import { l as lucia } from './auth_BNOajhtQ.mjs';
 import { generateIdFromEntropySize } from 'lucia';
 import { Scrypt } from 'oslo/password';
-import { d as db, U as User } from '../chunks/config_CudtQ6iI.mjs';
-import { $ as $$Layout } from '../chunks/Layout_kW219FBg.mjs';
-export { renderers } from '../renderers.mjs';
+import { d as db, U as User } from './config_CudtQ6iI.mjs';
 
-const $$Astro = createAstro();
 const $$Signup = createComponent(async ($$result, $$props, $$slots) => {
-  const Astro2 = $$result.createAstro($$Astro, $$props, $$slots);
+  const Astro2 = $$result.createAstro($$props, $$slots);
   Astro2.self = $$Signup;
   const scrypt = new Scrypt();
   let errorMessage = "";
@@ -18,9 +18,9 @@ const $$Signup = createComponent(async ($$result, $$props, $$slots) => {
     const username = formData.get("username");
     const password = formData.get("password");
     if (typeof username !== "string" || username.length < 3) {
-      errorMessage = "\u0406\u043C'\u044F \u043A\u043E\u0440\u0438\u0441\u0442\u0443\u0432\u0430\u0447\u0430 \u043D\u0430\u0434\u0442\u043E \u043A\u043E\u0440\u043E\u0442\u043A\u0435";
+      errorMessage = "Ім'я користувача надто коротке";
     } else if (typeof password !== "string" || password.length < 6) {
-      errorMessage = "\u041F\u0430\u0440\u043E\u043B\u044C \u043F\u043E\u0432\u0438\u043D\u0435\u043D \u0431\u0443\u0442\u0438 \u043D\u0435 \u043C\u0435\u043D\u0448\u0435 6 \u0441\u0438\u043C\u0432\u043E\u043B\u0456\u0432";
+      errorMessage = "Пароль повинен бути не менше 6 символів";
     } else {
       try {
         const passwordHash = await scrypt.hash(password);
@@ -39,7 +39,7 @@ const $$Signup = createComponent(async ($$result, $$props, $$slots) => {
         );
         return Astro2.redirect("/");
       } catch (e) {
-        errorMessage = "\u0426\u0435 \u0456\u043C'\u044F \u0432\u0436\u0435 \u0437\u0430\u0439\u043D\u044F\u0442\u0435";
+        errorMessage = "Це ім'я вже зайняте";
       }
     }
   }

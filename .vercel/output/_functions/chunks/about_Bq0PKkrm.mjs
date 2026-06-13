@@ -1,19 +1,17 @@
-import { e as createComponent, r as renderTemplate, k as renderComponent, h as createAstro } from '../chunks/astro/server_rOUT-VGP.mjs';
+import { c as createComponent } from './astro-component_D0R2L729.mjs';
 import 'piccolore';
+import { I as renderTemplate } from './sequence_5gyAyBy_.mjs';
+import { r as renderComponent } from './entrypoint_D61pzee8.mjs';
 import 'clsx';
-/* empty css                                 */
-import { $ as $$Menu } from '../chunks/Menu_Bh_G5M9m.mjs';
-import { $ as $$Layout } from '../chunks/Layout_kW219FBg.mjs';
-/* empty css                                 */
-export { renderers } from '../renderers.mjs';
+import { $ as $$Layout } from './Layout_DFa18sRI.mjs';
+import { $ as $$Menu } from './Menu_D4CLu_NK.mjs';
 
 const $$Welcome = createComponent(($$result, $$props, $$slots) => {
   return renderTemplate``;
 }, "C:/Users/jane/blog/src/components/Welcome.astro", void 0);
 
-const $$Astro = createAstro();
 const $$About = createComponent(($$result, $$props, $$slots) => {
-  const Astro2 = $$result.createAstro($$Astro, $$props, $$slots);
+  const Astro2 = $$result.createAstro($$props, $$slots);
   Astro2.self = $$About;
   return renderTemplate`${renderComponent($$result, "Layout", $$Layout, {}, { "default": ($$result2) => renderTemplate` ${renderComponent($$result2, "Menu", $$Menu, {})} ${renderComponent($$result2, "Welcome", $$Welcome, {})} ` })}`;
 }, "C:/Users/jane/blog/src/pages/about.astro", void 0);

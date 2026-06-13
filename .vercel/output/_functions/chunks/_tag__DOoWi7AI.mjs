@@ -1,14 +1,14 @@
-import { e as createComponent, k as renderComponent, r as renderTemplate, h as createAstro, m as maybeRenderHead, g as addAttribute } from '../../chunks/astro/server_rOUT-VGP.mjs';
+import { c as createComponent } from './astro-component_D0R2L729.mjs';
 import 'piccolore';
-import { d as db, P as Post, a as PostTag, T as Tag } from '../../chunks/config_CudtQ6iI.mjs';
+import { I as renderTemplate, u as maybeRenderHead, _ as addAttribute } from './sequence_5gyAyBy_.mjs';
+import { r as renderComponent } from './entrypoint_D61pzee8.mjs';
+import { d as db, P as Post, a as PostTag, T as Tag } from './config_CudtQ6iI.mjs';
 import { eq } from 'drizzle-orm';
-import { $ as $$Layout } from '../../chunks/Layout_kW219FBg.mjs';
-import { $ as $$Menu } from '../../chunks/Menu_Bh_G5M9m.mjs';
-export { renderers } from '../../renderers.mjs';
+import { $ as $$Layout } from './Layout_DFa18sRI.mjs';
+import { $ as $$Menu } from './Menu_D4CLu_NK.mjs';
 
-const $$Astro = createAstro();
 const $$tag = createComponent(async ($$result, $$props, $$slots) => {
-  const Astro2 = $$result.createAstro($$Astro, $$props, $$slots);
+  const Astro2 = $$result.createAstro($$props, $$slots);
   Astro2.self = $$tag;
   const { tag } = Astro2.params;
   if (!tag) return Astro2.redirect("/");
