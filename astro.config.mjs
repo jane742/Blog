@@ -1,11 +1,13 @@
 import { defineConfig } from 'astro/config';
-
-import vercel from '@astrojs/vercel'; // ВИПРАВЛЕНО 🟢
+import vercel from '@astrojs/vercel';
 
 export default defineConfig({
-  output: 'server', // або 'hybrid', залежно від твого проєкту
+  output: 'server',
   adapter: vercel({
-    // Це змусить старіший адаптер створювати правильну структуру для сучасного Vercel
-    edgeMiddleware: false, 
+    webAnalytics: {
+      enabled: true,
+    },
+    // Явно вказуємо режим Serverless, щоб Astro знав, що треба генерувати саме Node.js entry.mjs
+    mode: 'serverless', 
   }),
 });
